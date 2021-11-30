@@ -33,6 +33,7 @@ int main(int argc, char **argv) {
 		OPTION("--prefix", prefix1 = argv[i], prefix)
 		OPTION("--prefix2", prefix2 = argv[i], prefix2)
 		OPTION("--output", ofile = argv[i], output)
+		FLAG("--help", usage(stdout))
 		FLAG("--kern-en-dashes", kern_en_dashes = true)
 		ALIAS("-p", prefix)
 		ALIAS("-2", prefix2)
@@ -51,6 +52,6 @@ int main(int argc, char **argv) {
 	}
 
 	std::string file = io::infile(infile, io::perror_and_exit).mmap();
-	file			 = Preprocessor(argv[0], file, prefix1, prefix2, kern_en_dashes)();
+	file			 = Preprocessor(argv[0], infile, file, prefix1, prefix2, kern_en_dashes)();
 	io::ofile(ofile, io::perror_and_exit).write(file);
 }

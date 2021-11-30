@@ -16,6 +16,7 @@ __attribute__((noreturn)) void usage(FILE *stream) noexcept {
 		"Usage: xpp <file> [options]\n"
 		"\n"
 		"Options:\n"
+		"    --help                 display this help message\n"
 		"    -o, --output <file>    output to <file> instead of stdout\n"
 		"    -p, --prefix <str>     set the prefix for pass 1\n"
 		"    -2, --prefix2 <str>    set the prefix for pass 2\n"

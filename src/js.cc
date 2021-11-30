@@ -79,17 +79,16 @@ __attribute__((noreturn)) void V8Handle::Exception(v8::TryCatch *try_catch) cons
 			&& stack_trace->IsString()
 			&& stack_trace.As<String>()->Length() > 0)
 			fprintf(stderr, "%s\n", *String::Utf8Value(isolate, stack_trace));
-		else {
-			fprintf(stderr, "%s:%i: %s\n",
-				*String::Utf8Value(isolate, message->GetScriptOrigin().ResourceName()),
-				message->GetLineNumber(ctx).FromJust(),
-				*exception);
-			fprintf(stderr, "%s\n",
-				*String::Utf8Value(isolate, message->GetSourceLine(ctx).ToLocalChecked()));
-			for (int i = 0, end = message->GetStartColumn(ctx).FromJust(); i < end; i++) fprintf(stderr, " ");
-			for (int i = 0, end = message->GetEndColumn(ctx).FromJust(); i < end; i++) fprintf(stderr, "~");
-			fprintf(stderr, "\n");
-		}
+
+		fprintf(stderr, "%s:%i: %s\n",
+			*String::Utf8Value(isolate, message->GetScriptOrigin().ResourceName()),
+			message->GetLineNumber(ctx).FromJust(),
+			*exception);
+		fprintf(stderr, "%s\n",
+			*String::Utf8Value(isolate, message->GetSourceLine(ctx).ToLocalChecked()));
+		for (int i = 0, end = message->GetStartColumn(ctx).FromJust(); i < end; i++) fprintf(stderr, " ");
+		for (int i = 0, end = message->GetEndColumn(ctx).FromJust(); i < end; i++) fprintf(stderr, "~");
+		fprintf(stderr, "\n");
 	}
 
 	exit(1);

@@ -8,6 +8,7 @@
 class Preprocessor {
 	V8Handle v8;
 
+	std::string filename;
 	std::string file;
 	std::string prefix1		   = "%#";
 	std::string prefix2		   = "%##";
@@ -19,6 +20,7 @@ class Preprocessor {
 public:
 	Preprocessor(
 		const char *program_name,
+		std::string filename,
 		std::string file,
 		std::string prefix1,
 		std::string prefix2,
