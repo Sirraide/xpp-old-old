@@ -1,6 +1,6 @@
 #include "utils.h"
 
-__attribute__((noreturn)) void die(const char *format, ...) noexcept {
+__attribute__((noreturn)) void die(const char* format, ...) noexcept {
 	va_list args;
 	va_start(args, format);
 	fprintf(stderr, "\033[31m");
@@ -10,7 +10,7 @@ __attribute__((noreturn)) void die(const char *format, ...) noexcept {
 	exit(1);
 }
 
-__attribute__((noreturn)) void usage(FILE *stream) noexcept {
+__attribute__((noreturn)) void usage(FILE* stream) noexcept {
 	fflush(stream);
 	fprintf(stream,
 		"Usage: xpp <file> [options]\n"

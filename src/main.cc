@@ -22,12 +22,14 @@
 	}
 #define ALIAS(name, label) \
 	if (!strcmp(argv[i], name)) goto label;
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
 	std::string infile;
 	std::string ofile;
-	std::string prefix1		   = "%#";
-	std::string prefix2		   = "%##";
-	bool		kern_en_dashes = false;
+	std::string prefix1				= "%#";
+	std::string prefix2				= "%##";
+	bool		kern_en_dashes		= false;
+	bool		collapse_linebreaks = false;
+	bool		has_finally			= false;
 
 	for (int i = 1; i < argc; i++) {
 		OPTION("--prefix", prefix1 = argv[i], prefix)
@@ -35,6 +37,8 @@ int main(int argc, char **argv) {
 		OPTION("--output", ofile = argv[i], output)
 		FLAG("--help", usage(stdout))
 		FLAG("--kern-en-dashes", kern_en_dashes = true)
+		FLAG("--collapse-linebreaks", collapse_linebreaks = true)
+		FLAG("--finally", has_finally = true)
 		ALIAS("-p", prefix)
 		ALIAS("-2", prefix2)
 		ALIAS("-o", output)
@@ -52,6 +56,6 @@ int main(int argc, char **argv) {
 	}
 
 	std::string file = io::infile(infile, io::perror_and_exit).mmap();
-	file			 = Preprocessor(argv[0], infile, file, prefix1, prefix2, kern_en_dashes)();
+	file			 = Preprocessor(argv[0], infile, file, prefix1, prefix2, kern_en_dashes, collapse_linebreaks, has_finally)();
 	io::ofile(ofile, io::perror_and_exit).write(file);
 }

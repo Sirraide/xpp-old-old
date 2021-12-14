@@ -7,7 +7,7 @@
 
 using namespace v8;
 
-static void PrintImpl(const FunctionCallbackInfo<Value> &args) {
+static void PrintImpl(const FunctionCallbackInfo<Value>& args) {
 	for (int i = 0; i < args.Length(); i++) {
 		HandleScope scope(args.GetIsolate());
 		printf("%s", *String::Utf8Value(args.GetIsolate(), args[i]));
@@ -15,12 +15,12 @@ static void PrintImpl(const FunctionCallbackInfo<Value> &args) {
 	fflush(stdout);
 }
 
-static void PrintlnImpl(const FunctionCallbackInfo<Value> &args) {
+static void PrintlnImpl(const FunctionCallbackInfo<Value>& args) {
 	PrintImpl(args);
 	printf("\n");
 }
 
-V8Handle::V8Handle(const char *program_name) {
+V8Handle::V8Handle(const char* program_name) {
 	V8::InitializeICUDefaultLocation(program_name);
 	V8::InitializeExternalStartupData(program_name);
 	platform = platform::NewDefaultPlatform();
@@ -31,12 +31,12 @@ V8Handle::V8Handle(const char *program_name) {
 	isolate						  = Isolate::New(params);
 }
 
-void V8Handle::init(v8::Isolate::Scope *_isolate_scope, v8::Context::Scope *_ctx_scope) {
+void V8Handle::init(v8::Isolate::Scope* _isolate_scope, v8::Context::Scope* _ctx_scope) {
 	isolate_scope = _isolate_scope;
 	ctx_scope	  = _ctx_scope;
 }
 
-Local<Value> V8Handle::operator()(const std::string &code) const {
+Local<Value> V8Handle::operator()(const std::string& code) const {
 	TryCatch	  try_catch(isolate);
 	ScriptOrigin  origin(isolate, String::NewFromUtf8(isolate, "(xpp)").ToLocalChecked());
 	Local<Script> script;
@@ -67,7 +67,7 @@ void V8Handle::CreateContext() {
 	ctx = Context::New(isolate, nullptr, global);
 }
 
-__attribute__((noreturn)) void V8Handle::Exception(v8::TryCatch *try_catch) const {
+__attribute__((noreturn)) void V8Handle::Exception(v8::TryCatch* try_catch) const {
 	HandleScope		  handle_scope(isolate);
 	String::Utf8Value exception(isolate, try_catch->Exception());
 	Local<Message>	  message = try_catch->Message();

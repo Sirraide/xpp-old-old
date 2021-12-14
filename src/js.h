@@ -17,28 +17,28 @@ using value = v8::Local<v8::Value>;
 class V8Handle {
 	std::unique_ptr<v8::Platform> platform;
 	v8::Isolate::CreateParams	  params;
-	v8::Isolate::Scope		   *isolate_scope;
-	v8::Context::Scope		   *ctx_scope;
+	v8::Isolate::Scope*			  isolate_scope;
+	v8::Context::Scope*			  ctx_scope;
 
-	void Exception(v8::TryCatch *try_catch) const;
+	void Exception(v8::TryCatch* try_catch) const;
 
 public:
-	v8::Isolate					*isolate;
+	v8::Isolate*				  isolate;
 	v8::Local<v8::ObjectTemplate> global;
 	v8::Local<v8::Context>		  ctx;
-	explicit V8Handle(const char *program_name);
+	explicit V8Handle(const char* program_name);
 	~V8Handle();
 
-	V8Handle(const V8Handle &) = delete;
-	V8Handle(V8Handle &&)	   = delete;
-	V8Handle &operator=(const V8Handle &) = delete;
-	V8Handle &operator=(V8Handle &&) = delete;
+	V8Handle(const V8Handle&) = delete;
+	V8Handle(V8Handle&&)	  = delete;
+	V8Handle& operator=(const V8Handle&) = delete;
+	V8Handle& operator=(V8Handle&&) = delete;
 
 	void CreateContext();
-	auto operator()(const std::string &code) const -> v8::Local<v8::Value>;
+	auto operator()(const std::string& code) const -> v8::Local<v8::Value>;
 	void init(
-		v8::Isolate::Scope *_isolate_scope,
-		v8::Context::Scope *_ctx_scope //
+		v8::Isolate::Scope* _isolate_scope,
+		v8::Context::Scope* _ctx_scope //
 	);
 };
 

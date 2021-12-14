@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-void ReplaceAll(std::string &str, const std::string &from, const std::string &to) {
+void ReplaceAll(std::string& str, const std::string& from, const std::string& to) {
 	const size_t to_len	  = to.size();
 	const size_t from_len = from.size();
 	size_t		 where	  = 0;
@@ -21,13 +21,13 @@ void ReplaceAll(std::string &str, const std::string &from, const std::string &to
 	}
 }
 
-Preprocessor::Preprocessor(const char *program_name, std::string _filename, std::string _file, std::string _prefix1,
-	std::string _prefix2, bool _kern_en_dashes)
+Preprocessor::Preprocessor(const char* program_name, std::string _filename, std::string _file, std::string _prefix1,
+	std::string _prefix2, bool _kern_en_dashes, bool _collapse_linebreaks, bool _has_finally)
 	: v8(V8Handle(program_name)), filename(std::move(_filename)), file(std::move(_file)),
-	  prefix1(std::move(_prefix1)), prefix2(std::move(_prefix2)), kern_en_dashes(_kern_en_dashes) {
-}
+	  prefix1(std::move(_prefix1)), prefix2(std::move(_prefix2)), kern_en_dashes(_kern_en_dashes),
+	  collapse_linebreaks(_collapse_linebreaks), has_finally(_has_finally) {}
 
-std::string VecToStr(const std::vector<std::string> &vec) {
+std::string VecToStr(const std::vector<std::string>& vec) {
 	if (vec.empty()) return "";
 	if (vec.size() == 1) return vec[0];
 	std::string ret = vec[0];
@@ -35,7 +35,7 @@ std::string VecToStr(const std::vector<std::string> &vec) {
 	return ret;
 }
 
-std::vector<std::string> StringSplit(const std::string &str) {
+std::vector<std::string> StringSplit(const std::string& str) {
 	std::vector<std::string> elems;
 	std::stringstream		 ss(str);
 	while (ss.good()) {
@@ -46,7 +46,7 @@ std::vector<std::string> StringSplit(const std::string &str) {
 	return elems;
 }
 
-std::string TrimStr(const std::string &str) {
+std::string TrimStr(const std::string& str) {
 	size_t start = 0;
 	size_t end	 = str.size() - 1;
 	while (start < str.size() && isspace(str[start])) start++;
@@ -62,7 +62,7 @@ enum class EvaluationMode {
 	block,
 };
 
-void Preprocessor::DoPass(const std::string &prefix) {
+void Preprocessor::DoPass(const std::string& prefix) {
 	const size_t prefix_len = prefix.size();
 	size_t		 last		= 0;
 
@@ -158,22 +158,67 @@ void Preprocessor::DoPass(const std::string &prefix) {
 		v8("__injectbuf = ''");
 		file += tail;
 		last = pos;
+
+		if (mode == EvaluationMode::include && has_finally) CollectFinally();
 	}
 }
 
 void Preprocessor::KernEnDashes() {
 	std::regex r("(\\d)(–|--)(\\d)");
-	file = std::regex_replace(file, r, "$1\\kern1pt--\\kern1pt$3");
+	file = std::regex_replace(file, r, "$1\\endash$3");
+	if (has_finally) finally += R"(\def\endash{\kern1pt--\kern1pt})";
 }
 
-std::string &Preprocessor::operator()() {
+void Preprocessor::CollapseLinebreaks() {
+	std::regex r("\n\n\n+");
+	file = std::regex_replace(file, r, "\n\n");
+}
+
+void Preprocessor::DoCollectFinally(const std::string& pr) {
+	const std::string directive = pr + "eval finally";
+	size_t			  pos		= 0;
+	for (;;) {
+		pos = file.find(directive, pos);
+		if (pos == std::string::npos) return;
+		auto eol  = file.find('\n', pos);
+		auto pos2 = pos + directive.length() + 1;
+		if (eol == std::string::npos) eol++;
+		finally += file.substr(pos2, eol - pos2) + "\n";
+		file = file.substr(0, pos) + (eol != std::string::npos ? file.substr(eol) : "");
+	}
+}
+
+void Preprocessor::CollectFinally() {
+	DoCollectFinally(prefix1);
+	DoCollectFinally(prefix2);
+}
+
+std::pair<size_t, size_t> Preprocessor::FindFinally() {
+	auto str = prefix1 + "finally";
+	auto loc = file.find(str);
+	if (loc != std::string::npos) return {loc, str.size()};
+	auto str2 = prefix2 + "finally";
+	loc		  = file.find(str2);
+	if (loc != std::string::npos) return {loc, str2.size()};
+	die("Could not find %sfinally or %sfinally", prefix1.data(), prefix2.data());
+}
+
+void Preprocessor::EmitFinally() {
+	auto [pos, size] = FindFinally();
+	file			 = file.replace(pos, size, finally);
+}
+
+std::string& Preprocessor::operator()() {
 	V8HANDLE_INIT(v8);
 	v8("let __FILE__ = '"
 		+ filename
 		+ "'; let __injectbuf = '';\n"
 		  "function inject(str) { __injectbuf += str; return ''; }");
+	if (has_finally) CollectFinally();
 	DoPass(prefix1);
 	DoPass(prefix2);
 	if (kern_en_dashes) KernEnDashes();
+	if (collapse_linebreaks) CollapseLinebreaks();
+	if (has_finally) EmitFinally();
 	return file;
 }
