@@ -22,10 +22,10 @@ void ReplaceAll(std::string& str, const std::string& from, const std::string& to
 }
 
 Preprocessor::Preprocessor(const char* program_name, std::string _filename, std::string _file, std::string _prefix1,
-	std::string _prefix2, bool _kern_en_dashes, bool _collapse_linebreaks, bool _has_finally)
+	std::string _prefix2, bool _kern_en_dashes, bool _collapse_linebreaks, bool _has_finally, bool _skip_pass2)
 	: v8(V8Handle(program_name)), filename(std::move(_filename)), file(std::move(_file)),
 	  prefix1(std::move(_prefix1)), prefix2(std::move(_prefix2)), kern_en_dashes(_kern_en_dashes),
-	  collapse_linebreaks(_collapse_linebreaks), has_finally(_has_finally) {}
+	  collapse_linebreaks(_collapse_linebreaks), has_finally(_has_finally), skip_pass2(_skip_pass2) {}
 
 std::string VecToStr(const std::vector<std::string>& vec) {
 	if (vec.empty()) return "";
@@ -216,7 +216,7 @@ std::string& Preprocessor::operator()() {
 		  "function inject(str) { __injectbuf += str; return ''; }");
 	if (has_finally) CollectFinally();
 	DoPass(prefix1);
-	DoPass(prefix2);
+	if (!skip_pass2) DoPass(prefix2);
 	if (kern_en_dashes) KernEnDashes();
 	if (collapse_linebreaks) CollapseLinebreaks();
 	if (has_finally) EmitFinally();

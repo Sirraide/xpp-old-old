@@ -30,6 +30,7 @@ int main(int argc, char** argv) {
 	bool		kern_en_dashes		= false;
 	bool		collapse_linebreaks = false;
 	bool		has_finally			= false;
+	bool		skip_pass2			= false;
 
 	for (int i = 1; i < argc; i++) {
 		OPTION("--prefix", prefix1 = argv[i], prefix)
@@ -39,6 +40,7 @@ int main(int argc, char** argv) {
 		FLAG("--kern-en-dashes", kern_en_dashes = true)
 		FLAG("--collapse-linebreaks", collapse_linebreaks = true)
 		FLAG("--finally", has_finally = true)
+		FLAG("--skip-pass2", skip_pass2 = true)
 		ALIAS("-p", prefix)
 		ALIAS("-2", prefix2)
 		ALIAS("-o", output)
@@ -56,6 +58,6 @@ int main(int argc, char** argv) {
 	}
 
 	std::string file = io::infile(infile, io::perror_and_exit).mmap();
-	file			 = Preprocessor(argv[0], infile, file, prefix1, prefix2, kern_en_dashes, collapse_linebreaks, has_finally)();
+	file			 = Preprocessor(argv[0], infile, file, prefix1, prefix2, kern_en_dashes, collapse_linebreaks, has_finally, skip_pass2)();
 	io::ofile(ofile, io::perror_and_exit).write(file);
 }

@@ -17,11 +17,12 @@ class Preprocessor {
 	bool		kern_en_dashes		= false;
 	bool		collapse_linebreaks = false;
 	bool		has_finally			= false;
+	bool		skip_pass2			= false;
 
 	void DoPass(const std::string& prefix);
 	void KernEnDashes();
 	void CollapseLinebreaks();
-	std::pair<size_t, size_t> FindFinally();
+	auto FindFinally() -> std::pair<size_t, size_t>;
 	void EmitFinally();
 	void CollectFinally();
 	void DoCollectFinally(const std::string& prefix);
@@ -35,7 +36,8 @@ public:
 		std::string prefix2,
 		bool		kern_en_dashes,
 		bool		collapse_linebreaks,
-		bool		has_finally //
+		bool		has_finally,
+		bool		skip_pass2 //
 	);
 	std::string& operator()();
 };
