@@ -1,4 +1,6 @@
 # xpp
+THIS IS IN THE PROCESS OF BEING PHASED OUT
+
 A simple LaTeX preprocessor written in C++ that uses V8 for inline JavaScript evaluation.
 
 ## How to Use
